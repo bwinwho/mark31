@@ -49,7 +49,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
 
 /* CLOCK */
 #clock-section{text-align:center;margin-top:12px;margin-bottom:16px;flex-shrink:0}
-#greeting{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:31px;letter-spacing:.04em;color:var(--text);margin-bottom:4px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 #clock{font-family:'Cinzel',serif;font-weight:500;font-size:clamp(68px,9vw,118px);letter-spacing:.02em;line-height:1;color:var(--text)}
 #dateline{font-family:'DM Mono',monospace;font-size:15px;letter-spacing:.2em;color:var(--muted);margin-top:7px;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.55)}
 
@@ -81,36 +80,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
 .bm-act:hover{background:rgba(255,255,255,.15)}
 .bm-act.del:hover{background:rgba(200,60,60,.4)}
 
-/* TASKS */
-#tasks-list{flex:1;overflow-y:auto}
-#tasks-list::-webkit-scrollbar{width:2px}
-#tasks-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
-.task-item{display:flex;align-items:center;gap:14px;padding:14px 22px;background:rgba(8,8,8,.55);border:1px solid var(--bd);border-radius:15px;margin-bottom:7px;transition:background .2s;animation:fadeUp .3s ease both}
-.task-item:hover{background:rgba(255,255,255,.08)}
-.task-item.done{opacity:.4}
-.task-item.done .task-text{text-decoration:line-through;color:var(--muted)}
-.task-check{width:19px;height:19px;border-radius:50%;border:1px solid var(--bd);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:background .2s,border-color .2s}
-.task-check:hover,.task-item.done .task-check{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);color:#fff}
-.task-text{font-size:14px;font-weight:300;letter-spacing:.02em;flex:1}
-.task-del{width:22px;height:22px;border-radius:50%;border:none;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--dim);transition:color .2s,background .2s}
-.task-del:hover{color:#e07070;background:rgba(200,60,60,.15)}
-.tasks-empty{text-align:center;padding:56px 20px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--dim)}
-
-/* BOTTOM BAR */
-/* BOTTOM BAR */
-#bottom-bar{flex-shrink:0;display:flex;justify-content:center;align-items:center;gap:16px;padding-top:18px}
-
-/* PLUS BUTTON */
-.plus-btn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.92);border:none;color:#0a0a0a;font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s;flex-shrink:0;line-height:1;padding:0;padding-bottom:1px}
-.plus-btn:hover{transform:scale(1.12) rotate(90deg);background:#fff}
-.plus-btn:active{transform:scale(0.95) rotate(90deg)}
-.act-btn{background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:11px 30px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;letter-spacing:.07em;color:#0a0a0a;cursor:pointer;transition:background .2s,transform .18s}
-.act-btn:hover{background:var(--bb);transform:translateY(-2px)}
-.act-btn.primary{background:rgba(255,255,255,.92);border-color:transparent;color:#0a0a0a;font-weight:400}
-.act-btn.primary:hover{opacity:.86;transform:translateY(-2px)}
-.tab-btn{background:rgba(255,255,255,0.82);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:11px 30px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;letter-spacing:.07em;color:#0a0a0a;cursor:pointer;transition:all .2s}
-.tab-btn.active{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.24);color:var(--text)}
-
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
 .modal-overlay.open{opacity:1;visibility:visible}
@@ -123,6 +92,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
 .modal input::placeholder{color:var(--dim)}
 .modal-actions{display:flex;gap:9px;margin-top:24px}
 .modal-actions button{flex:1}
+.act-btn{background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:11px 30px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;letter-spacing:.07em;color:#0a0a0a;cursor:pointer;transition:background .2s,transform .18s}
+.act-btn:hover{background:var(--bb);transform:translateY(-2px)}
+.act-btn.primary{background:rgba(255,255,255,.92);border-color:transparent;color:#0a0a0a;font-weight:400}
+.act-btn.primary:hover{opacity:.86;transform:translateY(-2px)}
 
 /* ══ SETTINGS PANEL ══ */
 #settings-panel{overflow:hidden}
@@ -154,7 +127,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
 
 /* clock preview */
 .s-preview{background:rgba(0,0,0,.32);border:1px solid var(--bd);border-radius:10px;padding:18px;text-align:center;margin-bottom:12px}
-#prev-greet{font-style:italic;font-size:14px;color:var(--muted);margin-bottom:4px}
 #prev-clock{font-size:48px;line-height:1;color:var(--text)}
 #prev-date{font-size:9px;letter-spacing:.2em;color:var(--muted);margin-top:5px;text-transform:uppercase}
 
@@ -215,7 +187,6 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 body.heavy-graphics .bm-btn{background:rgba(255,255,255,0.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.25);border-top:1px solid rgba(255,255,255,0.4)}
 body.heavy-graphics .act-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
 
 @media(max-width:600px){
@@ -255,7 +226,7 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
     </div>
   </div>
 
-<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;width:100%;gap:0">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;width:100%;gap:0">
     <div id="clock-section">
       <div id="clock">00:00</div>
       <div id="dateline">—</div>
@@ -264,7 +235,6 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
       <div class="view active" id="view-bookmarks"><div id="bm-grid"></div></div>
     </div>
   </div>
-
 </div>
 
 <!-- SETTINGS PANEL (slides in from right) -->
@@ -294,7 +264,6 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
       <div class="s-card-head"><div class="s-ico">◷</div><h3>Clock Style</h3></div>
       <div class="s-div"></div>
       <div class="s-preview">
-        <div id="prev-greet">Good morning, <span id="prev-name">friend</span>.</div>
         <div id="prev-clock">10:24</div>
         <div id="prev-date">AM — Monday, May 26</div>
       </div>
@@ -327,7 +296,7 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
       </div>
     </div>
 
-<!-- GRAPHICS -->
+    <!-- GRAPHICS -->
     <div class="s-card">
       <div class="s-card-head"><div class="s-ico">✦</div><h3>Graphics</h3></div>
       <div class="s-div"></div>
@@ -366,7 +335,6 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
     </div>
 
     <!-- DATA -->
-
     <div class="s-card">
       <div class="s-card-head"><div class="s-ico">⇅</div><h3>Data</h3></div>
       <div class="s-div"></div>
@@ -401,7 +369,6 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
     </div>
   </div>
 </div>
-
 
 <div id="toast"></div>
 
@@ -467,8 +434,6 @@ const MAX_BM = 9;
 // ══════════════════════════════════════
 let userName = '';
 let bookmarks = [];
-let tasks = [];
-let currentView = 'bookmarks';
 
 // settings pending state
 let pFont = 'cinzel';
@@ -488,13 +453,10 @@ function init() {
   document.documentElement.style.setProperty('--bm-rows', savedRows);
   document.getElementById('grid-label').textContent = `Current: ${savedCols} × ${savedRows}`;
   bookmarks = JSON.parse(localStorage.getItem('mark_bookmarks') || '[]');
-  tasks     = JSON.parse(localStorage.getItem('mark_tasks') || '[]');
 
-  // Load saved wall — set video.src directly, never use <source>
   const savedSrc = localStorage.getItem('mark_wall_src') || DEFAULT_WALL;
   setVideo(savedSrc);
 
-  // Load saved clock style
   pFont = localStorage.getItem('mark_clock_font') || 'cinzel';
   pSize = parseInt(localStorage.getItem('mark_clock_size') || '96');
   pWallId  = localStorage.getItem('mark_wall_id')  || 'a1';
@@ -508,7 +470,6 @@ function init() {
     boot();
   }
   startClock();
-  renderBottomBar();
   buildSettingsUI();
 }
 
@@ -527,10 +488,7 @@ function applyClockStyle(fontId, size) {
 }
 
 function boot() {
-  renderGreeting();
   renderBookmarks();
-  renderTasks();
-  renderBottomBar();
 }
 
 // ══════════════════════════════════════
@@ -560,16 +518,9 @@ function startClock() {
     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     document.getElementById('dateline').textContent = `${ampm} — ${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
-    renderGreeting();
   }
   tick();
   setInterval(tick, 30000);
-}
-
-function renderGreeting() {
-  const h = new Date().getHours();
-  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('greeting').textContent = `${g}${userName ? ', ' + userName : ''}.`;
 }
 
 // ══════════════════════════════════════
@@ -644,54 +595,10 @@ function saveBookmark() {
 document.getElementById('bm-modal').addEventListener('keydown', e => { if (e.key==='Enter') saveBookmark(); if (e.key==='Escape') closeBmModal(); });
 
 // ══════════════════════════════════════
-//  TASKS
-// ══════════════════════════════════════
-function renderTasks() {
-  const list = document.getElementById('tasks-list');
-  if (!tasks.length) { list.innerHTML = `<div class="tasks-empty">Nothing pending.<br>Add something to do.</div>`; return; }
-  list.innerHTML = '';
-  tasks.forEach(t => {
-    const item = document.createElement('div');
-    item.className = 'task-item' + (t.done ? ' done' : '');
-    item.innerHTML = `<div class="task-check" onclick="toggleTask('${t.id}')">${t.done ? '✓' : ''}</div><div class="task-text">${esc(t.text)}</div><button class="task-del" onclick="deleteTask('${t.id}')">×</button>`;
-    list.appendChild(item);
-  });
-}
-function saveTasks() { localStorage.setItem('mark_tasks', JSON.stringify(tasks)); }
-
-function openTaskModal() { document.getElementById('task-inp').value = ''; document.getElementById('task-modal').classList.add('open'); setTimeout(() => document.getElementById('task-inp').focus(), 80); }
-function closeTaskModal() { document.getElementById('task-modal').classList.remove('open'); }
-
-function saveTask() {
-  const text = document.getElementById('task-inp').value.trim();
-  if (!text) return;
-  tasks.push({id:uid(), text, done:false, created:Date.now()});
-  saveTasks(); renderTasks(); closeTaskModal();
-}
-function toggleTask(id) { const t = tasks.find(t => t.id === id); if (t) t.done = !t.done; saveTasks(); renderTasks(); }
-function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); saveTasks(); renderTasks(); }
-document.getElementById('task-modal').addEventListener('keydown', e => { if (e.key==='Enter') saveTask(); if (e.key==='Escape') closeTaskModal(); });
-
-// ══════════════════════════════════════
-//  BOTTOM BAR
-// ══════════════════════════════════════
-function renderBottomBar() {
-  const bar = document.getElementById('bottom-bar');
-  if (currentView === 'bookmarks') {
-    bar.innerHTML = `<button class="tab-btn active">Bookmarks</button><button class="tab-btn" onclick="switchView('tasks')">Tasks</button>${bookmarks.length < MAX_BM ? `<button class="act-btn primary" onclick="openBmModal()">+ Add</button>` : ''}`;
-  } else {
-    bar.innerHTML = `<button class="tab-btn" onclick="switchView('bookmarks')">Bookmarks</button><button class="tab-btn active">Tasks</button><button class="act-btn primary" onclick="openTaskModal()">+ Add</button>`;
-  }
-}
-function switchView(v) { currentView = v; document.querySelectorAll('.view').forEach(x => x.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); renderBottomBar(); }
-
-// ══════════════════════════════════════
 //  SETTINGS
 // ══════════════════════════════════════
 function openSettings() {
-  // sync UI state
   document.getElementById('s-name').value = localStorage.getItem('mark_name') || '';
-  document.getElementById('prev-name').textContent = localStorage.getItem('mark_name') || 'friend';
   document.getElementById('sz-slider').value = pSize;
   document.getElementById('sz-val').textContent = pSize + 'px';
   updatePrevFont(pFont, pSize);
@@ -707,21 +614,17 @@ function buildSettingsUI() {
   buildWallGrids();
 }
 
-// ── name ──
 function saveName() {
   const val = document.getElementById('s-name').value.trim();
   if (!val) return;
   userName = val;
   localStorage.setItem('mark_name', val);
-  document.getElementById('prev-name').textContent = val;
-  renderGreeting();
   const el = document.getElementById('s-ok');
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2000);
 }
 document.getElementById('s-name').addEventListener('keydown', e => { if (e.key==='Enter') saveName(); });
 
-// ── clock ──
 function buildFontGrid() {
   const grid = document.getElementById('font-grid');
   grid.innerHTML = '';
@@ -739,7 +642,6 @@ function updatePrevFont(fontId, size) {
   const f = FONTS.find(x => x.id === fontId) || FONTS[0];
   document.getElementById('prev-clock').style.fontFamily = f.fam;
   document.getElementById('prev-clock').style.fontSize = size + 'px';
-  document.getElementById('prev-greet').style.fontFamily = f.fam;
   document.getElementById('prev-date').style.fontFamily = f.fam;
 }
 
@@ -752,7 +654,7 @@ function onSizeSlide(v) {
 function applyClock() {
   localStorage.setItem('mark_clock_font', pFont);
   localStorage.setItem('mark_clock_size', String(pSize));
-  applyClockStyle(pFont, pSize);  // ← applies live to the actual clock immediately
+  applyClockStyle(pFont, pSize);
   toast('Clock style applied ✓');
 }
 
@@ -764,7 +666,6 @@ function resetClock() {
   updatePrevFont('cinzel', 96);
 }
 
-// ── walls ──
 function buildWallGrids() {
   Object.entries(WALLS).forEach(([cat, items]) => {
     const grid = document.getElementById('wg-' + cat);
@@ -784,7 +685,6 @@ function buildWallGrids() {
         pWallId = w.id; pWallSrc = w.src;
         document.querySelectorAll('.wthumb').forEach(t => t.classList.remove('on'));
         thumb.classList.add('on');
-        // live preview on the bg video
         setVideo(w.src);
       };
 
@@ -816,9 +716,8 @@ function switchWCat(cat, btn) {
   document.getElementById('wcat-' + cat).classList.add('on');
 }
 
-// ── export / import ──
 function exportData() {
-  const data = {userName, bookmarks, tasks, exportedAt: new Date().toISOString()};
+  const data = {userName, bookmarks, exportedAt: new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mark-backup.json'; a.click();
   toast('Backup downloaded ✓');
@@ -831,7 +730,6 @@ function importData(e) {
     try {
       const d = JSON.parse(ev.target.result);
       if (d.bookmarks) { bookmarks = d.bookmarks; saveBM(); }
-      if (d.tasks) { tasks = d.tasks; saveTasks(); }
       if (d.userName) { userName = d.userName; localStorage.setItem('mark_name', userName); }
       boot(); toast('Imported ✓');
     } catch { toast('Invalid file'); }
@@ -839,7 +737,6 @@ function importData(e) {
   r.readAsText(file); e.target.value = '';
 }
 
-// ── blur toggle ──
 function toggleBlur() {
   const on = document.body.classList.toggle('heavy-graphics');
   localStorage.setItem('mark_blur', on ? '1' : '0');
@@ -848,7 +745,6 @@ function toggleBlur() {
   document.getElementById('blur-toggle-btn').style.color = on ? '#0a0a0a' : '';
 }
 
-// ── grid size ──
 function setGrid(type, val) {
   const cols = parseInt(localStorage.getItem('mark_grid_cols') || '3');
   const rows = parseInt(localStorage.getItem('mark_grid_rows') || '3');
@@ -864,17 +760,12 @@ function setGrid(type, val) {
   renderBookmarks();
 }
 
-
-// ── lofi ──
 function toggleLofi() {
   const p = document.getElementById('lofi'); const btn = document.getElementById('lofi-btn');
   if (p.paused) { p.play(); btn.textContent = '⏸ Pause'; btn.style.color = '#fff'; btn.style.borderColor = 'rgba(255,255,255,.5)'; }
   else { p.pause(); btn.textContent = '▶ Lo-Fi'; btn.style.color = ''; btn.style.borderColor = ''; }
 }
 
-// ══════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════
 function uid() { return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -887,7 +778,6 @@ function toast(msg) {
 
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open')); closeSettings(); } });
-
 
 init();
 </script>
