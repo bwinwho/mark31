@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@200;300;400&family=Playfair+Display:wght@300;400&family=Josefin+Sans:wght@200;300&family=Italiana&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --b: rgba(255,255,255,0.08);
+  --bb: rgba(255,255,255,0.13);
+  --bd: rgba(255,255,255,0.11);
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.44);
+  --dim: rgba(255,255,255,0.18);
+}
+
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif;color:var(--text);background:#000}
+
+/* VIDEO */
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;will-change:transform}
+#veil{position:fixed;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(0,0,0,.52) 0%,rgba(0,0,0,.28) 45%,rgba(0,0,0,.65) 100%)}
+
+/* LAYERS */
+#onboard{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.80);transition:opacity .4s,visibility .4s}
+#onboard.hidden{opacity:0;visibility:hidden;pointer-events:none}
+#app{position:relative;z-index:2;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:32px 56px;animation:fadeUp .7s ease .3s both}
+#settings-panel{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;background:#080808;transform:translateX(100%);transition:transform .38s cubic-bezier(.4,0,.2,1)}
+#settings-panel.open{transform:translateX(0)}
+
+/* ONBOARD */
+.ob-card{text-align:center;padding:60px 68px;background:rgba(8,8,8,.80);border:1px solid var(--bd);border-radius:26px;animation:fadeUp .7s ease both}
+.ob-card h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:46px;letter-spacing:.02em;margin-bottom:8px}
+.ob-card p{color:var(--muted);font-size:14px;font-weight:300;letter-spacing:.08em;margin-bottom:36px}
+.ob-input{background:rgba(255,255,255,.07);border:1px solid var(--bd);border-radius:50px;padding:13px 26px;color:#fff;font-family:'Outfit',sans-serif;font-size:16px;font-weight:300;width:100%;outline:none;text-align:center;letter-spacing:.05em;transition:border-color .25s}
+.ob-input:focus{border-color:rgba(255,255,255,.5)}
+.ob-btn{margin-top:18px;background:rgba(255,255,255,.92);border:none;border-radius:50px;padding:13px 42px;color:#0a0a0a;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;letter-spacing:.1em;cursor:pointer;transition:opacity .2s}
+.ob-btn:hover{opacity:.85}
+
+/* TOPBAR */
+#topbar{width:100%;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.brand{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.26em;color:var(--muted);text-transform:uppercase}
+.tbar-btns{display:flex;gap:7px}
+.tbtn{background:var(--b);border:1px solid var(--bd);border-radius:50px;padding:7px 17px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:background .2s,color .2s}
+.tbtn:hover{background:var(--bb);color:var(--text)}
+
+/* CLOCK */
+#clock-section{text-align:center;margin-top:12px;margin-bottom:16px;flex-shrink:0}
+#greeting{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:31px;letter-spacing:.04em;color:var(--text);margin-bottom:4px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+#clock{font-family:'Cinzel',serif;font-weight:500;font-size:clamp(68px,9vw,118px);letter-spacing:.02em;line-height:1;color:var(--text)}
+#dateline{font-family:'DM Mono',monospace;font-size:15px;letter-spacing:.2em;color:var(--muted);margin-top:7px;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.55)}
+
+/* CONTENT */
+#content{flex:0 0 auto;width:100%;max-width:1000px;display:flex;flex-direction:column;min-height:0}
+.view{display:none;flex-direction:column;height:100%;opacity:0}
+.view.active{display:flex;animation:viewIn .6s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes viewIn{
+  0%{opacity:0;transform:translateY(18px) scale(.98)}
+  60%{opacity:1}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* BOOKMARKS */
+#bm-grid{flex:1;display:grid;grid-template-columns:repeat(var(--bm-cols,3),1fr);grid-template-rows:repeat(var(--bm-rows,3),56px);gap:9px;overflow-y:auto;align-content:start}
+#bm-grid::-webkit-scrollbar{width:2px}
+#bm-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.bm-slot{position:relative;height:56px}
+.bm-btn{width:100%;height:100%;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-top:1px solid rgba(255,255,255,0.35);border-radius:50px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background .2s,transform .18s;overflow:hidden;padding:0 20px;text-decoration:none;color:var(--text)}
+.bm-btn:hover{background:rgba(255,255,255,0.22);transform:translateY(-2px)}
+.bm-btn.empty{border-style:dashed;border-color:var(--dim);cursor:default;background:transparent}
+.bm-btn.empty:hover{transform:none;background:transparent}
+.bm-favicon{width:15px;height:15px;border-radius:3px;flex-shrink:0;object-fit:contain}
+.bm-label{font-size:13px;font-weight:400;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;color:var(--text)}
+.bm-rank{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);flex-shrink:0}
+.bm-actions{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;gap:4px;z-index:5}
+.bm-slot:hover .bm-actions{display:flex}
+.bm-act{width:22px;height:22px;border-radius:50%;border:1px solid var(--bd);background:rgba(0,0,0,.65);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:background .2s}
+.bm-act:hover{background:rgba(255,255,255,.15)}
+.bm-act.del:hover{background:rgba(200,60,60,.4)}
+
+/* TASKS */
+#tasks-list{flex:1;overflow-y:auto}
+#tasks-list::-webkit-scrollbar{width:2px}
+#tasks-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+.task-item{display:flex;align-items:center;gap:14px;padding:14px 22px;background:rgba(8,8,8,.55);border:1px solid var(--bd);border-radius:15px;margin-bottom:7px;transition:background .2s;animation:fadeUp .3s ease both}
+.task-item:hover{background:rgba(255,255,255,.08)}
+.task-item.done{opacity:.4}
+.task-item.done .task-text{text-decoration:line-through;color:var(--muted)}
+.task-check{width:19px;height:19px;border-radius:50%;border:1px solid var(--bd);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:background .2s,border-color .2s}
+.task-check:hover,.task-item.done .task-check{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5);color:#fff}
+.task-text{font-size:14px;font-weight:300;letter-spacing:.02em;flex:1}
+.task-del{width:22px;height:22px;border-radius:50%;border:none;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--dim);transition:color .2s,background .2s}
+.task-del:hover{color:#e07070;background:rgba(200,60,60,.15)}
+.tasks-empty{text-align:center;padding:56px 20px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--dim)}
+
+/* BOTTOM BAR */
+/* BOTTOM BAR */
+#bottom-bar{flex-shrink:0;display:flex;justify-content:center;align-items:center;gap:16px;padding-top:18px}
+
+/* PLUS BUTTON */
+.plus-btn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.92);border:none;color:#0a0a0a;font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s;flex-shrink:0;line-height:1;padding:0;padding-bottom:1px}
+.plus-btn:hover{transform:scale(1.12) rotate(90deg);background:#fff}
+.plus-btn:active{transform:scale(0.95) rotate(90deg)}
+.act-btn{background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:11px 30px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;letter-spacing:.07em;color:#0a0a0a;cursor:pointer;transition:background .2s,transform .18s}
+.act-btn:hover{background:var(--bb);transform:translateY(-2px)}
+.act-btn.primary{background:rgba(255,255,255,.92);border-color:transparent;color:#0a0a0a;font-weight:400}
+.act-btn.primary:hover{opacity:.86;transform:translateY(-2px)}
+.tab-btn{background:rgba(255,255,255,0.82);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:11px 30px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;letter-spacing:.07em;color:#0a0a0a;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.24);color:var(--text)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{background:rgba(10,10,10,.94);border:1px solid var(--bd);border-radius:22px;padding:40px 44px;width:410px;transform:translateY(18px) scale(.97);transition:transform .22s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:27px;letter-spacing:.02em;margin-bottom:24px}
+.modal label{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:7px;margin-top:14px}
+.modal input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:11px;padding:11px 15px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;outline:none;transition:border-color .2s}
+.modal input:focus{border-color:rgba(255,255,255,.45)}
+.modal input::placeholder{color:var(--dim)}
+.modal-actions{display:flex;gap:9px;margin-top:24px}
+.modal-actions button{flex:1}
+
+/* ══ SETTINGS PANEL ══ */
+#settings-panel{overflow:hidden}
+#s-topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 36px 0;flex-shrink:0}
+#s-body{flex:1;overflow-y:auto;padding:16px 36px 36px;display:flex;flex-direction:column;gap:14px;min-height:0;-webkit-overflow-scrolling:touch}
+#s-body::-webkit-scrollbar{width:2px}
+#s-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:2px}
+
+.s-head{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;letter-spacing:.02em;padding:12px 36px 0;flex-shrink:0}
+.s-sub{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);padding:4px 36px 0;flex-shrink:0;text-transform:uppercase}
+
+.s-card{background:rgba(8,8,8,.62);border:1px solid var(--bd);border-radius:15px;padding:20px 22px}
+.s-card-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.s-ico{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.s-card-head h3{font-family:'Cinzel',serif;font-weight:500;font-size:10px;letter-spacing:.18em;color:rgba(255,255,255,.8);text-transform:uppercase}
+.s-div{height:1px;background:var(--bd);margin:0 0 16px}
+
+/* name row */
+.s-name-row{display:flex;gap:8px}
+.s-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:50px;padding:9px 16px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:300;outline:none;transition:border-color .2s;min-width:0}
+.s-inp:focus{border-color:rgba(255,255,255,.44)}
+.s-inp::placeholder{color:var(--dim)}
+.s-btn{background:rgba(255,255,255,.90);border:none;border-radius:50px;padding:9px 20px;color:#0a0a0a;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;cursor:pointer;transition:opacity .2s;white-space:nowrap;flex-shrink:0}
+.s-btn:hover{opacity:.83}
+.s-btn.ghost{background:rgba(255,255,255,.07);border:1px solid var(--bd);color:var(--text)}
+.s-btn.ghost:hover{background:rgba(255,255,255,.12);opacity:1}
+.s-ok{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.13em;color:rgba(255,255,255,.55);opacity:0;transition:opacity .3s;margin-top:7px;text-transform:uppercase}
+.s-ok.show{opacity:1}
+
+/* clock preview */
+.s-preview{background:rgba(0,0,0,.32);border:1px solid var(--bd);border-radius:10px;padding:18px;text-align:center;margin-bottom:12px}
+#prev-greet{font-style:italic;font-size:14px;color:var(--muted);margin-bottom:4px}
+#prev-clock{font-size:48px;line-height:1;color:var(--text)}
+#prev-date{font-size:9px;letter-spacing:.2em;color:var(--muted);margin-top:5px;text-transform:uppercase}
+
+/* font chips */
+.font-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.fchip{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:9px;padding:9px 6px;text-align:center;cursor:pointer;transition:background .18s,border-color .18s}
+.fchip:hover{background:rgba(255,255,255,.09)}
+.fchip.on{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.10)}
+.fchip-p{font-size:15px;line-height:1;margin-bottom:4px;color:var(--text)}
+.fchip-l{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.fchip.on .fchip-l{color:rgba(255,255,255,.75)}
+
+/* slider */
+.s-slider-row{display:flex;align-items:center;gap:12px}
+.s-slider-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;flex-shrink:0;width:60px}
+input[type=range]{-webkit-appearance:none;flex:1;height:3px;background:rgba(255,255,255,.14);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:none;cursor:pointer}
+.s-slider-val{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.65);width:30px;text-align:right;flex-shrink:0}
+
+.s-apply-row{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
+
+/* wall tabs */
+.wall-tabs{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.wtab{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:50px;padding:5px 15px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);cursor:pointer;text-transform:uppercase;transition:background .18s,border-color .18s,color .18s}
+.wtab.on{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.38);color:var(--text)}
+.wcat{display:none}
+.wcat.on{display:block}
+
+/* wall grid */
+.wall-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.wthumb{position:relative;aspect-ratio:16/9;border-radius:9px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .18s;background:#0d0d0d}
+.wthumb:hover{border-color:rgba(255,255,255,.25)}
+.wthumb.on{border-color:#fff}
+.wthumb-bg{position:absolute;inset:0;transition:opacity .3s}
+.wthumb.vplaying .wthumb-bg{opacity:0}
+.wthumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.wthumb.vplaying video{opacity:1}
+.wthumb-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;pointer-events:none;transition:opacity .3s}
+.wthumb.vplaying .wthumb-emoji{opacity:0}
+.wthumb-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 55%);display:flex;align-items:flex-end;padding:6px 8px;pointer-events:none}
+.wthumb-name{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.1em;color:rgba(255,255,255,.85);text-transform:uppercase}
+.wthumb-badge{position:absolute;top:5px;right:5px;width:14px;height:14px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:#000;opacity:0;transition:opacity .18s;pointer-events:none}
+.wthumb.on .wthumb-badge{opacity:1}
+
+/* data row */
+.data-row{display:flex;gap:8px}
+.data-btn{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;cursor:pointer;text-align:left;transition:background .18s;color:var(--text)}
+.data-btn:hover{background:rgba(255,255,255,.10)}
+.data-ico{font-size:17px;margin-bottom:5px}
+.data-title{font-size:13px;font-weight:300}
+.data-sub{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(8,8,8,.92);border:1px solid rgba(255,255,255,.18);border-radius:50px;padding:8px 22px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;color:rgba(255,255,255,.85);text-transform:uppercase;z-index:999;opacity:0;transition:opacity .24s,transform .24s;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+body.heavy-graphics .bm-btn{background:rgba(255,255,255,0.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.25);border-top:1px solid rgba(255,255,255,0.4)}
+body.heavy-graphics .act-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+
+@media(max-width:600px){
+  #app{padding:22px 18px}
+  #s-topbar,#s-head,#s-sub{padding-left:16px;padding-right:16px}
+  #s-body{padding:12px 16px 28px}
+  .font-grid{grid-template-columns:repeat(2,1fr)}
+  .wall-grid{grid-template-columns:repeat(2,1fr)}
+  .modal{width:94vw;padding:28px 22px}
+}
+</style>
+</head>
+<body>
+
+<video id="bgv" autoplay muted loop playsinline></video>
+<div id="veil"></div>
+
+<!-- ONBOARD -->
+<div id="onboard">
+  <div class="ob-card">
+    <h1>Welcome.</h1>
+    <p>What should we call you?</p>
+    <input class="ob-input" id="ob-name" type="text" placeholder="Your name" maxlength="30" autofocus>
+    <br>
+    <button class="ob-btn" onclick="saveUser()">Enter →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="topbar">
+    <div class="brand">MARK</div>
+    <div class="tbar-btns">
+      <audio id="lofi" src="https://lofi.stream.laut.fm/lofi" preload="none"></audio>
+      <button class="tbtn" id="lofi-btn" onclick="toggleLofi()">▶ Lo-Fi</button>
+      <button class="tbtn" onclick="openSettings()">⚙ Settings</button>
+    </div>
+  </div>
+
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;width:100%;gap:0">
+    <div id="clock-section">
+      <div id="greeting">Good morning.</div>
+      <div id="clock">00:00</div>
+      <div id="dateline">—</div>
+    </div>
+    <div id="content">
+      <div class="view active" id="view-bookmarks"><div id="bm-grid"></div></div>
+      <div class="view" id="view-tasks"><div id="tasks-list"></div></div>
+    </div>
+  </div>
+
+<div id="bottom-bar"></div>
+</div>
+
+<!-- SETTINGS PANEL (slides in from right) -->
+<div id="settings-panel">
+  <div id="s-topbar">
+    <div class="brand">MARK</div>
+    <button class="tbtn" onclick="closeSettings()">✕ Close</button>
+  </div>
+  <div class="s-head">Settings</div>
+  <div class="s-sub">Personalize your space</div>
+
+  <div id="s-body">
+
+    <!-- NAME -->
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">✦</div><h3>Your Name</h3></div>
+      <div class="s-div"></div>
+      <div class="s-name-row">
+        <input class="s-inp" id="s-name" type="text" placeholder="Enter your name" maxlength="30">
+        <button class="s-btn" onclick="saveName()">Save</button>
+      </div>
+      <div class="s-ok" id="s-ok">Saved ✓</div>
+    </div>
+
+    <!-- CLOCK STYLE -->
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">◷</div><h3>Clock Style</h3></div>
+      <div class="s-div"></div>
+      <div class="s-preview">
+        <div id="prev-greet">Good morning, <span id="prev-name">friend</span>.</div>
+        <div id="prev-clock">10:24</div>
+        <div id="prev-date">AM — Monday, May 26</div>
+      </div>
+      <div class="font-grid" id="font-grid"></div>
+      <div class="s-slider-row">
+        <span class="s-slider-lbl">Size</span>
+        <input type="range" id="sz-slider" min="48" max="240" step="2" value="96" oninput="onSizeSlide(this.value)">
+        <span class="s-slider-val" id="sz-val">96px</span>
+      </div>
+      <div class="s-apply-row">
+        <button class="s-btn ghost" onclick="resetClock()">Reset</button>
+        <button class="s-btn" onclick="applyClock()">Apply</button>
+      </div>
+    </div>
+
+    <!-- VIDEO WALLPAPER -->
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">▶</div><h3>Video Wallpaper</h3></div>
+      <div class="s-div"></div>
+      <div class="wall-tabs">
+        <button class="wtab on" onclick="switchWCat('anime',this)">Anime</button>
+        <button class="wtab" onclick="switchWCat('landscape',this)">Landscape</button>
+        <button class="wtab" onclick="switchWCat('lofi',this)">Lo-Fi</button>
+      </div>
+      <div class="wcat on" id="wcat-anime"><div class="wall-grid" id="wg-anime"></div></div>
+      <div class="wcat" id="wcat-landscape"><div class="wall-grid" id="wg-landscape"></div></div>
+      <div class="wcat" id="wcat-lofi"><div class="wall-grid" id="wg-lofi"></div></div>
+      <div class="s-apply-row" style="margin-top:13px">
+        <button class="s-btn" onclick="applyWall()">Apply Wallpaper</button>
+      </div>
+    </div>
+
+<!-- GRAPHICS -->
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">✦</div><h3>Graphics</h3></div>
+      <div class="s-div"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:13px;font-weight:300;margin-bottom:3px">Enable Blur / Heavy Graphics</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase">Uses backdrop-filter — may affect performance</div>
+        </div>
+        <button class="s-btn" id="blur-toggle-btn" onclick="toggleBlur()">Off</button>
+      </div>
+    </div>
+
+    <!-- GRID SIZE -->
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">⊞</div><h3>Bookmark Grid</h3></div>
+      <div class="s-div"></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;width:60px">Columns</span>
+          <div style="display:flex;gap:7px">
+            <button class="s-btn ghost" id="col-3" onclick="setGrid('cols',3)">3</button>
+            <button class="s-btn ghost" id="col-4" onclick="setGrid('cols',4)">4</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase;width:60px">Rows</span>
+          <div style="display:flex;gap:7px">
+            <button class="s-btn ghost" id="row-3" onclick="setGrid('rows',3)">3</button>
+            <button class="s-btn ghost" id="row-4" onclick="setGrid('rows',4)">4</button>
+            <button class="s-btn ghost" id="row-5" onclick="setGrid('rows',5)">5</button>
+            <button class="s-btn ghost" id="row-6" onclick="setGrid('rows',6)">6</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:12px" id="grid-label">Current: 3 × 3</div>
+    </div>
+
+    <!-- DATA -->
+
+    <div class="s-card">
+      <div class="s-card-head"><div class="s-ico">⇅</div><h3>Data</h3></div>
+      <div class="s-div"></div>
+      <div class="data-row">
+        <button class="data-btn" onclick="exportData()">
+          <div class="data-ico">↑</div>
+          <div class="data-title">Export</div>
+          <div class="data-sub">Download JSON</div>
+        </button>
+        <button class="data-btn" onclick="document.getElementById('imp-file').click()">
+          <div class="data-ico">↓</div>
+          <div class="data-title">Import</div>
+          <div class="data-sub">Restore JSON</div>
+        </button>
+      </div>
+      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="bm-modal">
+  <div class="modal">
+    <h2>Add Bookmark</h2>
+    <label>Name</label><input type="text" id="bm-name" placeholder="Google">
+    <label>URL</label><input type="url" id="bm-url" placeholder="https://google.com">
+    <input type="hidden" id="bm-eid">
+    <div class="modal-actions">
+      <button class="act-btn" onclick="closeBmModal()">Cancel</button>
+      <button class="act-btn primary" onclick="saveBookmark()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <h2>Add Task</h2>
+    <label>What needs to be done?</label>
+    <input type="text" id="task-inp" placeholder="Buy oat milk...">
+    <div class="modal-actions">
+      <button class="act-btn" onclick="closeTaskModal()">Cancel</button>
+      <button class="act-btn primary" onclick="saveTask()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const FONTS = [
+  {id:'cinzel',    lbl:'Cinzel',    fam:"'Cinzel',serif"},
+  {id:'cormorant', lbl:'Cormorant', fam:"'Cormorant Garamond',serif"},
+  {id:'outfit',    lbl:'Outfit',    fam:"'Outfit',sans-serif"},
+  {id:'dm-mono',   lbl:'DM Mono',   fam:"'DM Mono',monospace"},
+  {id:'playfair',  lbl:'Playfair',  fam:"'Playfair Display',serif"},
+  {id:'josefin',   lbl:'Josefin',   fam:"'Josefin Sans',sans-serif"},
+  {id:'italiana',  lbl:'Italiana',  fam:"'Italiana',serif"},
+  {id:'space',     lbl:'Space',     fam:"'Space Mono',monospace"},
+];
+
+const WGRADS = {
+  a1:'linear-gradient(135deg,#1a0a2e,#2d1a4a)',a2:'linear-gradient(135deg,#0a1628,#1a2d4a)',
+  a3:'linear-gradient(135deg,#2a0a1a,#4a1a2d)',a4:'linear-gradient(135deg,#0a0a1a,#1a1a2d)',
+  a5:'linear-gradient(135deg,#0a1a28,#1a2a3a)',a6:'linear-gradient(135deg,#1a1a0a,#2d2d1a)',
+  l1:'linear-gradient(135deg,#0a1a28,#2a3a4a)',l2:'linear-gradient(135deg,#0a1a2a,#1a3a4a)',
+  l3:'linear-gradient(135deg,#0a1a0a,#1a2a1a)',l4:'linear-gradient(135deg,#2a1a0a,#3a2a1a)',
+  l5:'linear-gradient(135deg,#0a0a1a,#1a1a3a)',l6:'linear-gradient(135deg,#1a0a0a,#2a1a1a)',
+  f1:'linear-gradient(135deg,#1a1208,#2a2018)',f2:'linear-gradient(135deg,#0a1218,#1a2228)',
+  f3:'linear-gradient(135deg,#0a0a18,#18181a)',f4:'linear-gradient(135deg,#180808,#281818)',
+  f5:'linear-gradient(135deg,#080818,#181828)',f6:'linear-gradient(135deg,#180a00,#281a08)',
+};
+
+const WALLS = {
+  anime:[
+    {id:'a1',name:'Evil Deity',  emoji:'⛩️', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/camellya-blood-moon-wuthering-waves-moewalls-com.mp4'},
+    {id:'a2',name:'Neon City',   emoji:'🌆', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/miku-starlight-idol-vocaloid-moewalls-com.mp4'},
+    {id:'a3',name:'Cherry Bloom',emoji:'🌸', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/hiyuki-sakura-wuthering-waves-moewalls-com.mp4'},
+    {id:'a4',name:'Dark Temple', emoji:'🏯', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/hiyuki-looking-behind-wuthering-waves-moewalls-com.mp4'},
+    {id:'a5',name:'Rain Street', emoji:'🌧️', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/rapi-red-hood-shining-light-nikke-moewalls-com.mp4'},
+    {id:'a6',name:'Moonrise',    emoji:'🌕', src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/evil-deity.mp4'},
+  ],
+  landscape:[
+    {id:'l1',name:'Mountain Mist',emoji:'🏔️',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260514_102933_4e8f73b5-775a-4179-b2fb-472f59063dcd.mp4'},
+    {id:'l2',name:'Ocean Calm',   emoji:'🌊',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260429_182501_0216c2be-1b2f-40d3-8716-0d4f42e73b44.mp4'},
+    {id:'l3',name:'Forest Rain',  emoji:'🌲',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260424_064411_9e9d7f84-9277-41f4-ab10-59172d89e6be.mp4'},
+    {id:'l4',name:'Desert Dusk',  emoji:'🏜️',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_074327_a4d6275d-82d9-4c83-bfbe-f1fb2213c17c.mp4'},
+    {id:'l5',name:'Northern Sky', emoji:'🌌',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260511_131941_d136af49-e243-493a-be14-6ff3f24e09e6.mp4'},
+    {id:'l6',name:'Valley Dawn',  emoji:'🌄',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260419_065931_e3ca7b53-d32e-4ad5-81de-dc9d6fcfda6d.mp4'},
+  ],
+  lofi:[
+    {id:'f1',name:'Cozy Room',    emoji:'🕯️',src:'https://jvaghslcaurgedzzcwah.supabase.co/storage/v1/object/public/vwalls/neon-dreams-and-rainy-nights-moewalls-com.mp4'},
+    {id:'f2',name:'Café Window',  emoji:'☕',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260520_111942_8fc50f9e-4dfd-45c1-81bb-d93342a23d87.mp4'},
+    {id:'f3',name:'Rainy Evening',emoji:'🌧️',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4'},
+    {id:'f4',name:'Book Nook',    emoji:'📚',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4'},
+    {id:'f5',name:'City Lights',  emoji:'🌃',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260416_031918_443d301c-b6d9-4a18-b102-c946a16d86ad.mp4'},
+    {id:'f6',name:'Autumn Study', emoji:'🍂',src:'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_171521_25968ba2-b594-4b32-aab7-f6b69398a6fa.mp4'},
+  ],
+};
+
+const DEFAULT_WALL = WALLS.anime[0].src;
+const MAX_BM = 9;
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let userName = '';
+let bookmarks = [];
+let tasks = [];
+let currentView = 'bookmarks';
+
+// settings pending state
+let pFont = 'cinzel';
+let pSize = 96;
+let pWallId = 'a1';
+let pWallSrc = DEFAULT_WALL;
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+function init() {
+  userName  = localStorage.getItem('mark_name') || '';
+  if (localStorage.getItem('mark_blur') === '1') { document.body.classList.add('heavy-graphics'); document.getElementById('blur-toggle-btn').textContent = 'On'; }
+  const savedCols = localStorage.getItem('mark_grid_cols') || '3';
+  const savedRows = localStorage.getItem('mark_grid_rows') || '3';
+  document.documentElement.style.setProperty('--bm-cols', savedCols);
+  document.documentElement.style.setProperty('--bm-rows', savedRows);
+  document.getElementById('grid-label').textContent = `Current: ${savedCols} × ${savedRows}`;
+  bookmarks = JSON.parse(localStorage.getItem('mark_bookmarks') || '[]');
+  tasks     = JSON.parse(localStorage.getItem('mark_tasks') || '[]');
+
+  // Load saved wall — set video.src directly, never use <source>
+  const savedSrc = localStorage.getItem('mark_wall_src') || DEFAULT_WALL;
+  setVideo(savedSrc);
+
+  // Load saved clock style
+  pFont = localStorage.getItem('mark_clock_font') || 'cinzel';
+  pSize = parseInt(localStorage.getItem('mark_clock_size') || '96');
+  pWallId  = localStorage.getItem('mark_wall_id')  || 'a1';
+  pWallSrc = localStorage.getItem('mark_wall_src') || DEFAULT_WALL;
+  applyClockStyle(pFont, pSize);
+
+  if (!userName) {
+    document.getElementById('onboard').classList.remove('hidden');
+  } else {
+    document.getElementById('onboard').classList.add('hidden');
+    boot();
+  }
+  startClock();
+  renderBottomBar();
+  buildSettingsUI();
+}
+
+function setVideo(src) {
+  const v = document.getElementById('bgv');
+  v.src = src;
+  v.load();
+  v.play().catch(() => {});
+}
+
+function applyClockStyle(fontId, size) {
+  const f = FONTS.find(x => x.id === fontId) || FONTS[0];
+  const el = document.getElementById('clock');
+  el.style.fontFamily = f.fam;
+  el.style.fontSize = size + 'px';
+}
+
+function boot() {
+  renderGreeting();
+  renderBookmarks();
+  renderTasks();
+  renderBottomBar();
+}
+
+// ══════════════════════════════════════
+//  ONBOARD
+// ══════════════════════════════════════
+function saveUser() {
+  const n = document.getElementById('ob-name').value.trim();
+  if (!n) return;
+  userName = n;
+  localStorage.setItem('mark_name', n);
+  document.getElementById('onboard').classList.add('hidden');
+  boot();
+}
+document.getElementById('ob-name').addEventListener('keydown', e => { if (e.key === 'Enter') saveUser(); });
+
+// ══════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════
+function startClock() {
+  function tick() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('clock').textContent = h + ':' + m;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('dateline').textContent = `${ampm} — ${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+    renderGreeting();
+  }
+  tick();
+  setInterval(tick, 30000);
+}
+
+function renderGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${g}${userName ? ', ' + userName : ''}.`;
+}
+
+// ══════════════════════════════════════
+//  BOOKMARKS
+// ══════════════════════════════════════
+function renderBookmarks() {
+  const grid = document.getElementById('bm-grid');
+  grid.innerHTML = '';
+  const sorted = [...bookmarks].sort((a,b) => (b.visits||0)-(a.visits||0));
+  for (let i = 0; i < MAX_BM; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'bm-slot';
+    if (i < sorted.length) {
+      const bm = sorted[i];
+      const rank = i < 3 ? ['✦','✧','·'][i] : '';
+      slot.innerHTML = `
+        <a class="bm-btn" href="${bm.url}" target="_blank" onclick="trackVisit('${bm.id}')">
+          <img class="bm-favicon" src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bm.url)}&sz=32" onerror="this.style.display='none'" alt="">
+          <span class="bm-label">${esc(bm.name)}</span>
+          ${rank ? `<span class="bm-rank">${rank}</span>` : ''}
+        </a>
+        <div class="bm-actions">
+          <button class="bm-act" onclick="editBm('${bm.id}')">✎</button>
+          <button class="bm-act del" onclick="deleteBm('${bm.id}')">×</button>
+        </div>`;
+    } else if (i === sorted.length) {
+      slot.innerHTML = `<button class="bm-btn empty" onclick="openBmModal()"><span style="color:var(--dim);font-size:22px;font-weight:200">+</span></button>`;
+    } else {
+      slot.innerHTML = `<div class="bm-btn empty"></div>`;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function trackVisit(id) {
+  const bm = bookmarks.find(b => b.id === id);
+  if (bm) { bm.visits = (bm.visits||0)+1; saveBM(); }
+  setTimeout(renderBookmarks, 300);
+}
+function saveBM() { localStorage.setItem('mark_bookmarks', JSON.stringify(bookmarks)); }
+
+function openBmModal(id) {
+  document.getElementById('bm-name').value = '';
+  document.getElementById('bm-url').value = '';
+  document.getElementById('bm-eid').value = id || '';
+  if (id) {
+    const bm = bookmarks.find(b => b.id === id);
+    if (bm) { document.getElementById('bm-name').value = bm.name; document.getElementById('bm-url').value = bm.url; }
+  }
+  document.getElementById('bm-modal').classList.add('open');
+  setTimeout(() => document.getElementById('bm-name').focus(), 80);
+}
+function closeBmModal() { document.getElementById('bm-modal').classList.remove('open'); }
+function editBm(id) { openBmModal(id); }
+function deleteBm(id) { bookmarks = bookmarks.filter(b => b.id !== id); saveBM(); renderBookmarks(); }
+
+function saveBookmark() {
+  const name = document.getElementById('bm-name').value.trim();
+  let url = document.getElementById('bm-url').value.trim();
+  const eid = document.getElementById('bm-eid').value;
+  if (!name || !url) return;
+  if (!url.startsWith('http')) url = 'https://' + url;
+  if (eid) {
+    const bm = bookmarks.find(b => b.id === eid);
+    if (bm) { bm.name = name; bm.url = url; }
+  } else {
+    if (bookmarks.length >= MAX_BM) return;
+    bookmarks.push({id:uid(), name, url, visits:0, created:Date.now()});
+  }
+  saveBM(); renderBookmarks(); closeBmModal();
+}
+document.getElementById('bm-modal').addEventListener('keydown', e => { if (e.key==='Enter') saveBookmark(); if (e.key==='Escape') closeBmModal(); });
+
+// ══════════════════════════════════════
+//  TASKS
+// ══════════════════════════════════════
+function renderTasks() {
+  const list = document.getElementById('tasks-list');
+  if (!tasks.length) { list.innerHTML = `<div class="tasks-empty">Nothing pending.<br>Add something to do.</div>`; return; }
+  list.innerHTML = '';
+  tasks.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'task-item' + (t.done ? ' done' : '');
+    item.innerHTML = `<div class="task-check" onclick="toggleTask('${t.id}')">${t.done ? '✓' : ''}</div><div class="task-text">${esc(t.text)}</div><button class="task-del" onclick="deleteTask('${t.id}')">×</button>`;
+    list.appendChild(item);
+  });
+}
+function saveTasks() { localStorage.setItem('mark_tasks', JSON.stringify(tasks)); }
+
+function openTaskModal() { document.getElementById('task-inp').value = ''; document.getElementById('task-modal').classList.add('open'); setTimeout(() => document.getElementById('task-inp').focus(), 80); }
+function closeTaskModal() { document.getElementById('task-modal').classList.remove('open'); }
+
+function saveTask() {
+  const text = document.getElementById('task-inp').value.trim();
+  if (!text) return;
+  tasks.push({id:uid(), text, done:false, created:Date.now()});
+  saveTasks(); renderTasks(); closeTaskModal();
+}
+function toggleTask(id) { const t = tasks.find(t => t.id === id); if (t) t.done = !t.done; saveTasks(); renderTasks(); }
+function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); saveTasks(); renderTasks(); }
+document.getElementById('task-modal').addEventListener('keydown', e => { if (e.key==='Enter') saveTask(); if (e.key==='Escape') closeTaskModal(); });
+
+// ══════════════════════════════════════
+//  BOTTOM BAR
+// ══════════════════════════════════════
+function renderBottomBar() {
+  const bar = document.getElementById('bottom-bar');
+  if (currentView === 'bookmarks') {
+    bar.innerHTML = `<button class="tab-btn active">Bookmarks</button><button class="tab-btn" onclick="switchView('tasks')">Tasks</button>${bookmarks.length < MAX_BM ? `<button class="act-btn primary" onclick="openBmModal()">+ Add</button>` : ''}`;
+  } else {
+    bar.innerHTML = `<button class="tab-btn" onclick="switchView('bookmarks')">Bookmarks</button><button class="tab-btn active">Tasks</button><button class="act-btn primary" onclick="openTaskModal()">+ Add</button>`;
+  }
+}
+function switchView(v) { currentView = v; document.querySelectorAll('.view').forEach(x => x.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); renderBottomBar(); }
+
+// ══════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════
+function openSettings() {
+  // sync UI state
+  document.getElementById('s-name').value = localStorage.getItem('mark_name') || '';
+  document.getElementById('prev-name').textContent = localStorage.getItem('mark_name') || 'friend';
+  document.getElementById('sz-slider').value = pSize;
+  document.getElementById('sz-val').textContent = pSize + 'px';
+  updatePrevFont(pFont, pSize);
+  buildFontGrid();
+  document.getElementById('settings-panel').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-panel').classList.remove('open');
+}
+
+function buildSettingsUI() {
+  buildFontGrid();
+  buildWallGrids();
+}
+
+// ── name ──
+function saveName() {
+  const val = document.getElementById('s-name').value.trim();
+  if (!val) return;
+  userName = val;
+  localStorage.setItem('mark_name', val);
+  document.getElementById('prev-name').textContent = val;
+  renderGreeting();
+  const el = document.getElementById('s-ok');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+document.getElementById('s-name').addEventListener('keydown', e => { if (e.key==='Enter') saveName(); });
+
+// ── clock ──
+function buildFontGrid() {
+  const grid = document.getElementById('font-grid');
+  grid.innerHTML = '';
+  FONTS.forEach(f => {
+    const c = document.createElement('div');
+    c.className = 'fchip' + (f.id === pFont ? ' on' : '');
+    c.dataset.id = f.id;
+    c.innerHTML = `<div class="fchip-p" style="font-family:${f.fam}">10:24</div><div class="fchip-l">${f.lbl}</div>`;
+    c.onclick = () => { pFont = f.id; document.querySelectorAll('.fchip').forEach(x => x.classList.toggle('on', x.dataset.id === f.id)); updatePrevFont(pFont, pSize); };
+    grid.appendChild(c);
+  });
+}
+
+function updatePrevFont(fontId, size) {
+  const f = FONTS.find(x => x.id === fontId) || FONTS[0];
+  document.getElementById('prev-clock').style.fontFamily = f.fam;
+  document.getElementById('prev-clock').style.fontSize = size + 'px';
+  document.getElementById('prev-greet').style.fontFamily = f.fam;
+  document.getElementById('prev-date').style.fontFamily = f.fam;
+}
+
+function onSizeSlide(v) {
+  pSize = parseInt(v);
+  document.getElementById('sz-val').textContent = v + 'px';
+  document.getElementById('prev-clock').style.fontSize = v + 'px';
+}
+
+function applyClock() {
+  localStorage.setItem('mark_clock_font', pFont);
+  localStorage.setItem('mark_clock_size', String(pSize));
+  applyClockStyle(pFont, pSize);  // ← applies live to the actual clock immediately
+  toast('Clock style applied ✓');
+}
+
+function resetClock() {
+  pFont = 'cinzel'; pSize = 96;
+  document.getElementById('sz-slider').value = 96;
+  document.getElementById('sz-val').textContent = '96px';
+  buildFontGrid();
+  updatePrevFont('cinzel', 96);
+}
+
+// ── walls ──
+function buildWallGrids() {
+  Object.entries(WALLS).forEach(([cat, items]) => {
+    const grid = document.getElementById('wg-' + cat);
+    grid.innerHTML = '';
+    items.forEach(w => {
+      const thumb = document.createElement('div');
+      thumb.className = 'wthumb' + (w.id === pWallId ? ' on' : '');
+      thumb.dataset.id = w.id;
+      thumb.innerHTML = `
+        <div class="wthumb-bg" style="background:${WGRADS[w.id]||'#111'}"></div>
+        <video muted loop playsinline></video>
+        <div class="wthumb-emoji">${w.emoji}</div>
+        <div class="wthumb-ov"><span class="wthumb-name">${w.name}</span></div>
+        <div class="wthumb-badge">✓</div>`;
+
+      thumb.onclick = () => {
+        pWallId = w.id; pWallSrc = w.src;
+        document.querySelectorAll('.wthumb').forEach(t => t.classList.remove('on'));
+        thumb.classList.add('on');
+        // live preview on the bg video
+        setVideo(w.src);
+      };
+
+      let loaded = false;
+      const loadVid = () => {
+        if (loaded) return; loaded = true;
+        const vid = thumb.querySelector('video');
+        vid.src = w.src; vid.load();
+        vid.play().then(() => thumb.classList.add('vplaying')).catch(() => {});
+      };
+      thumb.addEventListener('mouseenter', loadVid, {passive:true});
+      thumb.addEventListener('touchstart', loadVid, {once:true, passive:true});
+
+      grid.appendChild(thumb);
+    });
+  });
+}
+
+function applyWall() {
+  localStorage.setItem('mark_wall_id', pWallId);
+  localStorage.setItem('mark_wall_src', pWallSrc);
+  toast('Wallpaper saved ✓');
+}
+
+function switchWCat(cat, btn) {
+  document.querySelectorAll('.wtab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.wcat').forEach(c => c.classList.remove('on'));
+  document.getElementById('wcat-' + cat).classList.add('on');
+}
+
+// ── export / import ──
+function exportData() {
+  const data = {userName, bookmarks, tasks, exportedAt: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mark-backup.json'; a.click();
+  toast('Backup downloaded ✓');
+}
+
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.bookmarks) { bookmarks = d.bookmarks; saveBM(); }
+      if (d.tasks) { tasks = d.tasks; saveTasks(); }
+      if (d.userName) { userName = d.userName; localStorage.setItem('mark_name', userName); }
+      boot(); toast('Imported ✓');
+    } catch { toast('Invalid file'); }
+  };
+  r.readAsText(file); e.target.value = '';
+}
+
+// ── blur toggle ──
+function toggleBlur() {
+  const on = document.body.classList.toggle('heavy-graphics');
+  localStorage.setItem('mark_blur', on ? '1' : '0');
+  document.getElementById('blur-toggle-btn').textContent = on ? 'On' : 'Off';
+  document.getElementById('blur-toggle-btn').style.background = on ? 'rgba(255,255,255,0.92)' : '';
+  document.getElementById('blur-toggle-btn').style.color = on ? '#0a0a0a' : '';
+}
+
+// ── grid size ──
+function setGrid(type, val) {
+  const cols = parseInt(localStorage.getItem('mark_grid_cols') || '3');
+  const rows = parseInt(localStorage.getItem('mark_grid_rows') || '3');
+  const newCols = type === 'cols' ? val : cols;
+  const newRows = type === 'rows' ? val : rows;
+  localStorage.setItem('mark_grid_cols', newCols);
+  localStorage.setItem('mark_grid_rows', newRows);
+  document.documentElement.style.setProperty('--bm-cols', newCols);
+  document.documentElement.style.setProperty('--bm-rows', newRows);
+  document.getElementById('grid-label').textContent = `Current: ${newCols} × ${newRows}`;
+  ['3','4'].forEach(n => document.getElementById('col-'+n)?.classList.toggle('on', String(n) === String(newCols)));
+  ['3','4','5','6'].forEach(n => document.getElementById('row-'+n)?.classList.toggle('on', String(n) === String(newRows)));
+  renderBookmarks();
+}
+
+
+// ── lofi ──
+function toggleLofi() {
+  const p = document.getElementById('lofi'); const btn = document.getElementById('lofi-btn');
+  if (p.paused) { p.play(); btn.textContent = '⏸ Pause'; btn.style.color = '#fff'; btn.style.borderColor = 'rgba(255,255,255,.5)'; }
+  else { p.pause(); btn.textContent = '▶ Lo-Fi'; btn.style.color = ''; btn.style.borderColor = ''; }
+}
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function uid() { return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open')); closeSettings(); } });
+
+
+init();
+</script>
+</body>
+</html>
