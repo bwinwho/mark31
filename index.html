@@ -257,17 +257,14 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
 
 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;width:100%;gap:0">
     <div id="clock-section">
-      <div id="greeting">Good morning.</div>
       <div id="clock">00:00</div>
       <div id="dateline">—</div>
     </div>
     <div id="content">
       <div class="view active" id="view-bookmarks"><div id="bm-grid"></div></div>
-      <div class="view" id="view-tasks"><div id="tasks-list"></div></div>
     </div>
   </div>
 
-<div id="bottom-bar"></div>
 </div>
 
 <!-- SETTINGS PANEL (slides in from right) -->
@@ -405,17 +402,6 @@ body.heavy-graphics .tab-btn{backdrop-filter:blur(18px);-webkit-backdrop-filter:
   </div>
 </div>
 
-<div class="modal-overlay" id="task-modal">
-  <div class="modal">
-    <h2>Add Task</h2>
-    <label>What needs to be done?</label>
-    <input type="text" id="task-inp" placeholder="Buy oat milk...">
-    <div class="modal-actions">
-      <button class="act-btn" onclick="closeTaskModal()">Cancel</button>
-      <button class="act-btn primary" onclick="saveTask()">Add</button>
-    </div>
-  </div>
-</div>
 
 <div id="toast"></div>
 
